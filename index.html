@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Portfolioa Mohammad Rasya</title>
+  <title>Portfolio Mohammad Rasya</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
@@ -21,7 +21,7 @@
     .navbar .nav-link { color: var(--mauve); font-weight: 500; }
     .navbar .nav-link:hover { color: var(--rose-tua); }
 
-    /* Tombol: satu class sudah memuat bentuk, ukuran, dan warna */
+    /* Tombol */
     .tombol-utama, .tombol-outline, .tombol-pink { --bs-btn-border-radius: 50rem; --bs-btn-padding-x: 1.5rem; --bs-btn-padding-y: .7rem; --bs-btn-font-size: 1.1rem; --bs-btn-font-weight: 600; }
     .tombol-utama { --bs-btn-color: #fff; --bs-btn-bg: var(--ink); --bs-btn-border-color: var(--ink); --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #000; --bs-btn-hover-border-color: #000; --bs-btn-active-color: #fff; --bs-btn-active-bg: #000; }
     .tombol-outline { --bs-btn-color: var(--ink); --bs-btn-bg: #fff; --bs-btn-border-width: 2px; --bs-btn-border-color: #0663ce; --bs-btn-hover-color: var(--ink); --bs-btn-hover-bg: #fff; --bs-btn-hover-border-color: var(--rose); --bs-btn-active-color: var(--ink); --bs-btn-active-bg: #fff; }
@@ -117,7 +117,7 @@
               <h3 class="h5 fw-bold">Project Digital</h3>
               <p class="small teks-mauve flex-grow-1">Membuat Project Pengelolaan Sampah berbasis Aplikasi.</p>
               <button class="btn tombol-pink align-self-start" data-bs-toggle="modal" data-bs-target="#modalInfo" data-judul="Projet Digital"
-                      data-meta="Bukti:" 
+                      data-meta="Bukti:"
                       data-isi="https://www.figma.com/proto/GVEHkdZwrvdYWiCtgPhArw/TrashHub?node-id=6-2&p=f&t=YZ6qUkmI3HRFpeWC-0&scaling=min-zoom&content-scaling=fixed&page-id=3%3A4&starting-point-node-id=6%3A2"
                       >Lihat detail</button>
             </div>
@@ -146,7 +146,7 @@
       </div>
     </section>
 
-    <!-- CONTACTS: form dengan validasi -->
+    <!-- CONTACTS: form dengan validasi, dikirim ke email lewat Formspree -->
     <section id="contacts" class="container py-5">
       <div class="row justify-content-center">
         <div class="col-lg-7 col-xl-6">
@@ -154,13 +154,16 @@
             <h2 class="fw-bold mb-4">Kirim Pesan</h2>
             <form id="form" novalidate>
               <div class="mb-3"><label for="nama" class="form-label fw-semibold">Nama</label>
-                <input type="text" id="nama" class="form-control input-form" autocomplete="name"><div class="invalid-feedback"></div></div>
+                <input type="text" id="nama" name="nama" class="form-control input-form" autocomplete="name"><div class="invalid-feedback"></div></div>
               <div class="mb-3"><label for="email" class="form-label fw-semibold">Email</label>
-                <input type="email" id="email" class="form-control input-form" autocomplete="email"><div class="invalid-feedback"></div></div>
+                <input type="email" id="email" name="email" class="form-control input-form" autocomplete="email"><div class="invalid-feedback"></div></div>
               <div class="mb-4"><label for="pesan" class="form-label fw-semibold">Pesan</label>
-                <textarea id="pesan" rows="4" class="form-control input-form"></textarea><div class="invalid-feedback"></div></div>
-              <button type="submit" class="btn tombol-utama w-100">Kirim Pesan</button>
+                <textarea id="pesan" name="pesan" rows="4" class="form-control input-form"></textarea><div class="invalid-feedback"></div></div>
+              <!-- Honeypot anti-spam: sengaja disembunyikan, jangan dihapus -->
+              <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="display:none">
+              <button type="submit" id="tombolKirim" class="btn tombol-utama w-100">Kirim Pesan</button>
               <div id="sukses" class="alert alert-success rounded-4 d-none mt-3 mb-0" role="status">Pesan terkirim. Terima kasih!</div>
+              <div id="gagal" class="alert alert-danger rounded-4 d-none mt-3 mb-0" role="alert">Pesan gagal terkirim. Coba lagi beberapa saat.</div>
             </form>
           </div></div>
         </div>
@@ -188,6 +191,9 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const $ = id => document.getElementById(id);
+
+    // submit email
+    const FORMSPREE_URL = 'https://formsubmit.co/ajax/rasyaaromadhan6106@gmail.com';
 
     // 1. Teks peran yang mengetik sendiri
     const daftarPeran = ['"Selayaknya Laki-laki"'];
@@ -228,15 +234,41 @@
       $(id).addEventListener('blur', () => validasi(id));
       $(id).addEventListener('input', () => $(id).classList.contains('is-invalid') && validasi(id));
     });
-    $('form').addEventListener('submit', e => {
+
+    // 4. Kirim form ke email lewat Formspree
+    $('form').addEventListener('submit', async e => {
       e.preventDefault();
+      $('sukses').classList.add('d-none');
+      $('gagal').classList.add('d-none');
+
       const valid = Object.keys(aturan).map(validasi).every(Boolean);
-      $('sukses').classList.toggle('d-none', !valid);
-      if (valid) { e.target.reset(); e.target.querySelectorAll('.form-control').forEach(f => f.classList.remove('is-valid')); }
-      else e.target.querySelector('.is-invalid').focus();
+      if (!valid) { e.target.querySelector('.is-invalid').focus(); return; }
+
+      const tombol = $('tombolKirim');
+      const teksAwal = tombol.textContent;
+      tombol.disabled = true;
+      tombol.textContent = 'Mengirim...';
+
+      try {
+        const res = await fetch(FORMSPREE_URL, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json' },
+          body: new FormData(e.target)
+        });
+        if (!res.ok) throw new Error('Status ' + res.status);
+        $('sukses').classList.remove('d-none');
+        e.target.reset();
+        e.target.querySelectorAll('.form-control').forEach(f => f.classList.remove('is-valid'));
+      } catch (err) {
+        console.error(err);
+        $('gagal').classList.remove('d-none');
+      } finally {
+        tombol.disabled = false;
+        tombol.textContent = teksAwal;
+      }
     });
 
-    // 4. Tahun di footer
+    // 5. Tahun di footer
     $('tahun').textContent = new Date().getFullYear();
   </script>
 </body>
